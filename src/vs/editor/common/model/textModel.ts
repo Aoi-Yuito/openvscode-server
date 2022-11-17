@@ -6,7 +6,7 @@
 import { ArrayQueue, pushMany } from 'vs/base/common/arrays';
 import { VSBuffer, VSBufferReadableStream } from 'vs/base/common/buffer';
 import { Color } from 'vs/base/common/color';
-import { onUnexpectedError } from 'vs/base/common/errors';
+import { illegalArgument, onUnexpectedError } from 'vs/base/common/errors';
 import { Emitter, Event } from 'vs/base/common/event';
 import { IMarkdownString } from 'vs/base/common/htmlContent';
 import { combinedDisposable, Disposable, IDisposable } from 'vs/base/common/lifecycle';
@@ -111,7 +111,7 @@ export function createTextBuffer(value: string | model.ITextBufferFactory | mode
 let MODEL_ID = 0;
 
 const LIMIT_FIND_COUNT = 999;
-export const LONG_LINE_BOUNDARY = 10000;
+const LONG_LINE_BOUNDARY = 10000;
 
 class TextModelSnapshot implements model.ITextSnapshot {
 
@@ -172,7 +172,7 @@ const enum StringOffsetValidationType {
 
 export class TextModel extends Disposable implements model.ITextModel, IDecorationsTreesHost {
 
-	private static readonly MODEL_SYNC_LIMIT = 50 * 1024 * 1024; // 50 MB
+	static _MODEL_SYNC_LIMIT = 50 * 1024 * 1024; // 50 MB,  // used in tests
 	private static readonly LARGE_FILE_SIZE_THRESHOLD = 20 * 1024 * 1024; // 20 MB;
 	private static readonly LARGE_FILE_LINE_COUNT_THRESHOLD = 300 * 1000; // 300K lines
 
@@ -346,7 +346,7 @@ export class TextModel extends Disposable implements model.ITextModel, IDecorati
 			this._isTooLargeForTokenization = false;
 		}
 
-		this._isTooLargeForSyncing = (bufferTextLength > TextModel.MODEL_SYNC_LIMIT);
+		this._isTooLargeForSyncing = (bufferTextLength > TextModel._MODEL_SYNC_LIMIT);
 
 		this._versionId = 1;
 		this._alternativeVersionId = 1;
@@ -429,9 +429,9 @@ export class TextModel extends Disposable implements model.ITextModel, IDecorati
 
 	public setValue(value: string | model.ITextSnapshot): void {
 		this._assertNotDisposed();
-		if (value === null) {
-			// There's nothing to do
-			return;
+
+		if (value === null || value === undefined) {
+			throw illegalArgument();
 		}
 
 		const { textBuffer, disposable } = createTextBuffer(value, this._options.defaultEOL);
@@ -2308,7 +2308,7 @@ function _normalizeOptions(options: model.IModelDecorationOptions): ModelDecorat
 	return ModelDecorationOptions.createDynamic(options);
 }
 
-export class DidChangeDecorationsEmitter extends Disposable {
+class DidChangeDecorationsEmitter extends Disposable {
 
 	private readonly _actual: Emitter<IModelDecorationsChangedEvent> = this._register(new Emitter<IModelDecorationsChangedEvent>());
 	public readonly event: Event<IModelDecorationsChangedEvent> = this._actual.event;
@@ -2394,7 +2394,7 @@ export class DidChangeDecorationsEmitter extends Disposable {
 
 //#endregion
 
-export class DidChangeContentEmitter extends Disposable {
+class DidChangeContentEmitter extends Disposable {
 
 	/**
 	 * Both `fastEvent` and `slowEvent` work the same way and contain the same events, but first we invoke `fastEvent` and then `slowEvent`.

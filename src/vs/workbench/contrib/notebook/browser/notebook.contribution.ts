@@ -812,7 +812,7 @@ configurationRegistry.registerConfiguration({
 			tags: ['notebookLayout']
 		},
 		[NotebookSetting.focusIndicator]: {
-			description: nls.localize('notebook.focusIndicator.description', "Controls where the focus indicator is rendered, either along the cell borders or on the left gutter"),
+			description: nls.localize('notebook.focusIndicator.description', "Controls where the focus indicator is rendered, either along the cell borders or on the left gutter."),
 			type: 'string',
 			enum: ['border', 'gutter'],
 			default: 'gutter',
@@ -900,7 +900,7 @@ configurationRegistry.registerConfiguration({
 			tags: ['notebookLayout']
 		},
 		[NotebookSetting.outputFontSize]: {
-			markdownDescription: nls.localize('notebook.outputFontSize', "Font size for the output text for notebook cells. When set to {0}, {1} is used.", '`0`', '`#editor.fontSize#`'),
+			markdownDescription: nls.localize('notebook.outputFontSize', "Font size for the output text for notebook cells. When set to 0, {0} is used.", '`#editor.fontSize#`'),
 			type: 'number',
 			default: 0,
 			tags: ['notebookLayout']
@@ -910,5 +910,11 @@ configurationRegistry.registerConfiguration({
 			type: 'string',
 			tags: ['notebookLayout']
 		},
+		[NotebookSetting.kernelPickerMRU]: {
+			markdownDescription: nls.localize('notebook.kernelPickerMRU', "Controls whether the kernel picker should show the most recently used kernels."),
+			type: 'boolean',
+			tags: ['notebookLayout'],
+			default: false
+		}
 	}
 });
